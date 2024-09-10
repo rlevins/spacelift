@@ -1,24 +1,26 @@
-terraform {
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 4.16"
-    }
-  }
-
-  required_version = ">= 1.2.0"
-}
-
 provider "aws" {
-  region  = "us-east-2"
+  region = "us-east-2"
 }
 
-resource "aws_instance" "app_server" {
-  ami           = "ami-830c94e3"
-  instance_type = "t2.micro"
-
+resource "aws_vpc" "myvpc" {
+  cidr_block = "10.0.0.0/16"
   tags = {
-    Name = "ExampleAppServerInstance"
+    Name = "myvpc"
+  }
+}
+resource "aws_subnet" "mysubnet" {
+  vpc_id     = aws_vpc.myvpc.id
+  cidr_block = "10.0.1.0/24"
+  tags = {
+    Name = "mysubnet"
   }
 }
 
+resource "aws_instance" "ubuntu2204" {
+  ami           = "ami-080e1f13689e07408"
+  instance_type = "t2.micro"
+  subnet_id     = aws_subnet.mysubnet.id
+  tags = {
+    Name = "ubuntu2204"
+  }
+}
